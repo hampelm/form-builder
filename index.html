@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <script data-main="js/main" src="js/require.js"></script>
+
+
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/underscore.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <!--<script type="text/javascript" src="js/app.js"></script>-->
+    <script type="text/javascript" src="js/data.js"></script>
+    <script type="text/javascript" src="js/form.js"></script>
+
+    <script type="text/javascript" src="js/cascade.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">    
+    <style>
+    #top {
+        margin-top: 1em;
+    }
+    #preview {
+        display: none;
+        height:100px;
+    }
+    #survey-title {
+    }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+
+        <div class="row" id="top">
+            <div class="span7">
+                <form>
+                    <input class="input-xxlarge" type="text" placeholder="Name your survey" id="survey-title">
+                </form>
+            </div>
+            <div class="span5 ">
+                <button type="button" class="btn btn-success preview">Preview form</strong></button>
+            </div>
+        </div>
+
+        <div id="preview">
+            <form id="preview-form"></form>
+        </div>
+
+        <div class="row">
+            <div class="span7">
+                <form>
+
+                    <div id="questions"></div>
+
+                    <div>
+                        <hr>
+                    </div>
+                </form>
+
+            </div>
+            <div class="span5 ">
+                <pre id="form-json">JSON goes here</pre>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script type="text/template" id="question-template">
+        <div class="question well" data-type="yesno" data-name="<%= name %>">
+            <legend>Question</legend>
+            <input type="text" placeholder="Question" value="<%= text %>" data-role="question" />
+            <br>
+            <button type="button" class="btn btn-small question-type" data-role="radio-question">Select one</button>
+            <button type="button" class="btn btn-small question-type" data-role="checkbox-question">Multiple choice</button>
+            <button type="button" class="btn btn-warning btn-small remove"><i class="icon-trash icon-white"></i> Delete question</button>
+            
+
+            <legend>Answers</legend>
+            <div class="answers"></div>
+            <button type="button" class="btn btn-success btn-small add-answer"><i class="icon-plus-sign icon-white"></i> Add an option</button>
+            <button type="button" class="btn btn-success add-question"><i class="icon-plus-sign icon-white"></i> Add a question after <strong><%= name %></strong></button>
+
+        </div>
+    </script>
+
+    <script type="text/template" id="answer-template">
+        <div data-role="answer">
+            <input type="text" value="<%= text %>" />
+            <button type="button" class="btn btn-small remove"><i class="icon-trash"></i></button>
+             <!--<button type="button" class="btn btn-small"><i class="icon-plus-sign "></i> Add a sub-question</button>-->
+        </div>
+    </script>
+
+</body>
+</html>
