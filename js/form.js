@@ -1,13 +1,164 @@
-var app = {};
+/*jslint nomen: true */
+/*globals define: true */
 
-app.formRender = {
-    var form = $('#preview-form form');
-    var formQuestions = $('#preview-form'); 
+define(function (require) {
+  'use strict';
+
+  var $ = require('jquery');
+  var _ = require('underscore');
+
+  var api = require('api');
+  var settings = require('settings');
+
+  return function (app, formContainerId) {
+    var form = $(formContainerId + ' form');
+    var formQuestions = $('#questions'); 
     var repeatCounter = {};
+
+    this.init = function(){
+      console.log("Initialize form");
+
+      // Listen for objectedSelected, triggered when items on the map are tapped
+      // $.subscribe("objectSelected", setSelectedObjectInfo);  
+
+      // Render the form 
+
+      // CHANGE NOTE
+      // Change for the editor: we don't want to get the form from the API
+      // api.getForm(renderForm);
+      formQuestions.html('');
+      renderForm();
+
+
+      // Add a function to serialize the form for submission to the API
+      // usage: form.serializeObject();
+      form.serializeObject = function() {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+          if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+              o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+          } else {
+            o[this.name] = this.value || '';
+          }
+        });
+        return o;
+      };
+    };
+
+    // Update the form with information about the selected object.
+    // Then, display the form.
+    var setSelectedObjectInfo = function(e) {
+      console.log("Showing the form");
+      var $addressDOM = $('h2 .parcel_id');
+
+      $addressDOM.fadeOut(400, function() {
+        $addressDOM.text(app.selectedObject.humanReadableName.titleCase());
+        $addressDOM.fadeIn(400);
+      });
+
+      if(!$('#form').is(":visible")) {
+        $('#form').slideToggle();
+      }
+      if($('#startpoint').is(":visible")) {
+        $('#startpoint').hide();
+      }
+      if($('#thanks').is(":visible")) {
+        $('#thanks').slideToggle();
+      }
+    };
+
+
+    // Form submission .........................................................
+
+    // Handle the parcel survey form being submitted
+    form.submit(function(event) {
+      console.log("Submitting survey results");
+
+      // Stop form from submitting normally
+      event.preventDefault(); 
+
+      var url = api.getSurveyURL() + form.attr('action'); 
+
+      // Serialize the form
+      var serialized = form.serializeObject();
+
+      // Get some info about the centroid as floats. 
+      var selectedCentroid = app.selectedObject.centroid;
+      console.log(selectedCentroid);
+      var centroidLat = parseFloat(selectedCentroid.coordinates[0]);
+      var centroidLng = parseFloat(selectedCentroid.coordinates[1]);
+
+      console.log("Selected object ID");
+      console.log(app.selectedObject.id);
+
+      // Construct a response in the format we need it.  
+      var responses = {responses: [{
+        "source": {
+          "type":"mobile", 
+          "collector":app.collectorName
+        }, 
+        "geo_info": {
+          "centroid":[centroidLng, centroidLat], 
+          "geometry": app.selectedObject.geometry,
+          "humanReadableName": app.selectedObject.humanReadableName, 
+          parcel_id: app.selectedObject.id // Soon to be deprecated
+        }, 
+        "parcel_id": app.selectedObject.id, // Soon to be deprecated
+        "object_id": app.selectedObject.id, // Replaces parcel_id
+        "responses": serialized
+      }]};
+
+      console.log("Serialized & responses:");
+      console.log(serialized);
+      console.log(responses);
+      console.log(url);
+
+      // Post the form
+      // TODO: This will need to use Prashant's browser-safe POSTing
+      var jqxhr = $.post(url, responses, function() {
+        console.log("Form successfully posted");
+      },"text").error(function(){ 
+        var key;
+        var result = "";
+        for (key in jqxhr) {
+          result += key + ": " + jqxhr[key] + "\n";
+        }
+        console.log("error: " + result);
+      }).success(function(){
+        successfulSubmit();
+      });
+    });
+
+    // Clear the form and thank the user after a successful submission
+    // TODO: pass in selected_parcel_json
+    function successfulSubmit() {
+      console.log("Successful submit");
+
+      // Publish  a "form submitted" event
+      $.publish("successfulSubmit");
+
+      // Hide the form and show the thanks
+      $('#form').slideToggle();
+      $('#thanks').slideToggle();
+
+      if($('#address-search-prompt').is(":hidden")) {
+        $('#address-search-prompt').slideToggle();
+      }
+      if($('#address-search').is(":visible")) {
+        $('#address-search').slideToggle();
+      }
+
+      // Reset the form for the next submission.
+      resetForm();
+    }
 
     // Reset the form: clear checkboxes, remove added option groups, hide 
     // sub options.
-    var resetForm = function() {
+    function resetForm() {
       console.log("Resetting form");
 
       // Clear all checkboxes and radio buttons
@@ -29,14 +180,14 @@ app.formRender = {
 
       // Remove additional repeating groups
       $('.append-to').empty();
-    };
+    }
 
 
     // Render the form ...........................................................
     var renderForm = function() {
       console.log("Form data:");
-      console.log(data);
-      $.each(data, function (index, question) {
+      console.log(settings.formData.questions);
+      $.each(settings.formData.questions, function (index, question) {
         addQuestion(question);
       });    
       form.trigger("create");
@@ -251,6 +402,7 @@ app.formRender = {
               parentID: id,
               triggerID: id
             }));
+
             formQuestions.append($repeatBox);
             $repeatButton = $repeatBox.find('a');
             var $appendTo = $repeatBox.find('.append-to');
@@ -337,5 +489,10 @@ app.formRender = {
       }
 
       $('.repeating-button[data-parent=' + parent + ']').hide();
-    };
-}
+    }
+
+    // Trigger form init .........................................................
+    this.init();
+
+  };
+});

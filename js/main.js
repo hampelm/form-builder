@@ -15,10 +15,11 @@ require.config({
 
 
 require(['jquery', 'underscore', 'bootstrap', 'app'],
-        function ($, _, bootstrap, app) {
-  'use strict';
+  function ($, _, bootstrap, app) {
+    'use strict';
 
-  $(document).ready(function () {
-    app.init();
-  });
-});
+    $(document).ready(function () {
+      app.init();
+    });
+  }
+);
