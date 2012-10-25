@@ -10,10 +10,12 @@ define(function (require) {
 
   var $ = require('jquery');
   var _ = require('underscore');
+  var moment = require('moment');
 
   var settings = require('settings');
   var api = require('api');
   var Builder = require('builder');
+
 
   var app = {
     preview: {},
@@ -29,8 +31,31 @@ define(function (require) {
           app.builder = new Builder(app);
           console.log(app.builder);
           app.builder.init();
+
+          // Handle saving the survey
+          $('.save').click(function() {
+            console.log("Save clicked");
+            var key;
+            var formsEndpoint = api.getSurveyURL() + '/forms';
+
+            var jqxhr = $.post(formsEndpoint, { "forms": [ settings.formData ] }, function() {
+              console.log("Form successfully posted");
+            },"text").error(function(){ 
+              var key;
+              var result = "";
+              for (key in jqxhr) {
+                result += key + ": " + jqxhr[key] + "\n";
+              }
+              console.log("error: " + result);
+            }).success(function(){
+              console.log("Success!");
+              $("#last-save").html("Last saved " + moment().format('h:mm:ss a [on] MMMM Do YYYY'));
+            });
+
+          }); // Done handling save
+
         })
-      });
+      }); 
     }
   };
 

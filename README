@@ -1,0 +1,4 @@
+This app lets you quickly edit forms used in LocalData surveys. 
+
+Use: download and run in a browser. If needed, change they survey endpoint
+in `settings.js`

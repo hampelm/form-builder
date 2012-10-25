@@ -9,6 +9,10 @@ require.config({
   shim: {
     'underscore': {
       exports: '_'
+    },
+
+    'moment': {
+      exports: 'moment'
     }
   }
 });
