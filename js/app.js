@@ -38,6 +38,13 @@ define(function (require) {
             var key;
             var formsEndpoint = api.getSurveyURL() + '/forms';
 
+            // Delete data from the old object to save a new version
+            delete settings.formData.created;
+            delete settings.formData._id;
+            delete settings.formData.id;
+
+            console.log("Data being posted: ", settings.formData);
+
             var jqxhr = $.post(formsEndpoint, { "forms": [ settings.formData ] }, function() {
               console.log("Form successfully posted");
             },"text").error(function(){ 
