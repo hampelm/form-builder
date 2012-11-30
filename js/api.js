@@ -69,8 +69,12 @@ define(function (require) {
         }
         return false; 
       });
+
       settings.formData = mobileForms[0];
-      
+
+      // Todo - remove
+      // settings.formData = data.forms[0];
+
       console.log("Mobile forms");
       console.log(mobileForms);
       

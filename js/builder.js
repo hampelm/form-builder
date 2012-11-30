@@ -49,6 +49,13 @@ define(function (require) {
         $('#editor').html('');
         console.log(settings.formData);
 
+        // Default to a blank question if the form is empty 
+        if (settings.formData === undefined) {
+          settings.formData = {};
+          settings.formData.questions = [];
+          settings.formData.questions.push(new blankQuestion());
+        };
+
         // Render form
         _.each(settings.formData.questions, function (question, questionIndex) {
           addQuestion(question, undefined, undefined, undefined, undefined, questionIndex, settings.formData.questions);

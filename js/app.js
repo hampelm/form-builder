@@ -43,6 +43,10 @@ define(function (require) {
             delete settings.formData._id;
             delete settings.formData.id;
 
+
+            // Set mobile form type
+            settings.formData.type = "mobile";
+
             console.log("Data being posted: ", settings.formData);
 
             var jqxhr = $.post(formsEndpoint, { "forms": [ settings.formData ] }, function() {
